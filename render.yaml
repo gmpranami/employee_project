@@ -1,16 +1,15 @@
 services:
   - type: web
     name: employee-project
-    runtime: python               # was: env: python
+    runtime: python
     plan: free
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
-    preDeployCommand: |           # was: postDeployCommand
-      python manage.py migrate
-      # Optional seed:
-      # python manage.py seed_data --employees 50 --days 90
-    startCommand: gunicorn employee_project.wsgi:application --workers=2 --threads=4 --timeout=120 --bind 0.0.0.0:$PORT
+    # Migrate each time the service starts, then run gunicorn
+    startCommand: >
+      python manage.py migrate &&
+      gunicorn employee_project.wsgi:application --workers=2 --threads=4 --timeout=120 --bind 0.0.0.0:$PORT
     autoDeploy: true
     healthCheckPath: /health
     envVars:
