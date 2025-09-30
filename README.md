@@ -326,5 +326,6 @@ try {
 | DB connection error      | Postgres not running / wrong URL          | Start DB, verify `DATABASE_URL`                                   |
 | Invalid host header      | Host not in `ALLOWED_HOSTS`               | Add to `.env`: `ALLOWED_HOSTS=127.0.0.1,localhost`                |
 
-#   e m p l o y e e _ p r o j e c t  
+#   e m p l o y e e _ p r o j e c t 
+ 
  
