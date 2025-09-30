@@ -1,4 +1,4 @@
-````markdown
+````
 # Employee Management System (Django + DRF)
 
 A modular Django project featuring **Employees**, **Departments**, **Attendance**, and **Performance** with:
@@ -329,3 +329,4 @@ try {
 #   e m p l o y e e _ p r o j e c t 
  
  
+
