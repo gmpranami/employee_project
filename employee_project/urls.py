@@ -10,20 +10,29 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from django.http import JsonResponse
 
+# Routers
 router = DefaultRouter()
 router.register(r"employees", EmployeeViewSet)
 router.register(r"departments", DepartmentViewSet)
 router.register(r"attendance", AttendanceViewSet)
 router.register(r"performance", PerformanceViewSet)
 
+# Swagger
 schema_view = get_schema_view(
     openapi.Info(title="Employee API", default_version="v1"),
     public=True,
     permission_classes=(permissions.AllowAny,),
 )
 
-def health(_): return JsonResponse({"status": "ok"})
+# Healthcheck
+def health(_):
+    return JsonResponse({"status": "ok"})
 
+# Redirect root → swagger
+def root_redirect(request):
+    return redirect("/swagger/", permanent=False)
+
+# URL patterns
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", include(router.urls)),
@@ -34,6 +43,3 @@ urlpatterns = [
     path("health/", health),
     path("", root_redirect),
 ]
-
-def root_redirect(request):
-    return redirect("/swagger/", permanent=False)
