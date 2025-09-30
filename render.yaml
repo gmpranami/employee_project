@@ -3,7 +3,7 @@ services:
     name: employee-project
     runtime: python
     plan: free
-    pythonVersion: 3.12.5
+    pythonVersion: 3.11
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
