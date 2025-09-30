@@ -1,15 +1,18 @@
 from pathlib import Path
-import environ, os
+import os
+import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# env
-env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+# env (safe even if .env doesn't exist)
+env = environ.Env(DEBUG=(bool, False))
+env_file = BASE_DIR / ".env"
+if env_file.exists():
+    environ.Env.read_env(str(env_file))
 
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY", default="change-me")
 DEBUG = env.bool("DEBUG", default=False)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[".onrender.com", "localhost", "127.0.0.1"])
 
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
@@ -20,6 +23,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",   # ★ important for Render
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -46,7 +50,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "employee_project.wsgi.application"
 
-DATABASES = {"default": env.db()}   # reads DATABASE_URL
+# DB: Render provides DATABASE_URL; fall back to SQLite locally
+DATABASES = {
+    "default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+}
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -66,7 +73,11 @@ TIME_ZONE = "America/New_York"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 SWAGGER_SETTINGS = {
@@ -78,3 +89,6 @@ SWAGGER_SETTINGS = {
         }
     },
 }
+
+CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com"]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
