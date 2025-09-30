@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-employee_db}
+      POSTGRES_USER: ${POSTGRES_USER:-employee_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-employee_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: gunicorn employee_project.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    environment:
+      DEBUG: ${DEBUG:-False}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret}
+      DATABASE_URL: ${DATABASE_URL:-postgres://employee_user:employee_pass@db:5432/employee_db}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Analytics Charts</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family:sans-serif; margin:24px; }
+    .row { display:flex; gap:24px; flex-wrap:wrap; }
+    .card { flex:1 1 480px; padding:16px; border:1px solid #ddd; border-radius:12px; }
+    canvas { width:100%; max-width:680px; height:380px; }
+  </style>
+</head>
+<body>
+  <h1>Analytics</h1>
+  <div class="row">
+    <div class="card">
+      <h3>Employees per Department</h3>
+      <canvas id="pie"></canvas>
+    </div>
+    <div class="card">
+      <h3>Monthly Attendance (Present count)</h3>
+      <canvas id="bar"></canvas>
+    </div>
+  </div>
+  <script>
+    async function load(url){ const r=await fetch(url); return r.json(); }
+
+    (async ()=>{
+      const pieData = await load("/analytics/charts/data/employees-per-department/");
+      const ctx1 = document.getElementById("pie").getContext("2d");
+      new Chart(ctx1, {
+        type:"pie",
+        data:{ labels: pieData.labels, datasets:[{ data: pieData.values }] },
+      });
+
+      const barData = await load("/analytics/charts/data/monthly-attendance/");
+      const ctx2 = document.getElementById("bar").getContext("2d");
+      new Chart(ctx2, {
+        type:"bar",
+        data:{ labels: barData.labels, datasets:[{ data: barData.values, label:"Present" }] },
+        options:{ scales:{ y:{ beginAtZero:true } } }
+      });
+    })();
+  </script>
+</body>
+</html>
