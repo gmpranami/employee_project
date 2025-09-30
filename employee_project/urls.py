@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 from rest_framework.routers import DefaultRouter
 from employees.views import EmployeeViewSet, DepartmentViewSet
 from attendance.views import AttendanceViewSet, PerformanceViewSet
@@ -31,4 +32,8 @@ urlpatterns = [
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("analytics/", include("analytics.urls")),
     path("health/", health),
+    path("", root_redirect),
 ]
+
+def root_redirect(request):
+    return redirect("/swagger/", permanent=False)
