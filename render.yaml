@@ -3,7 +3,6 @@ services:
     name: employee-project
     runtime: python
     plan: free
-    pythonVersion: 3.11
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
@@ -25,7 +24,6 @@ services:
         fromDatabase:
           name: employee-db
           property: connectionString
-
 databases:
   - name: employee-db
     plan: free
