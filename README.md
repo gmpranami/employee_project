@@ -1,61 +1,51 @@
-````
 # Employee Management System (Django + DRF)
 
-A modular Django project featuring **Employees**, **Departments**, **Attendance**, and **Performance** with:
-- PostgreSQL + `.env` configuration (via `django-environ`)
-- JWT auth (SimpleJWT)
-- DRF CRUD APIs with pagination, filtering, search, and ordering
-- Swagger UI (drf-yasg)
-- Seed script (30–50+ employees, attendance, performance)
-- Bonus: Chart.js views (Employees/Department, Monthly Attendance)
-
----
+A modular Django project for managing **Employees**, **Departments**, **Attendance**, and **Performance**.  
+Includes JWT authentication, Swagger docs, PostgreSQL, and optional seeding for demo data.
 
 ## 🔧 Tech Stack
 
-- **Backend:** Django, Django REST Framework, django-filter
-- **Auth:** SimpleJWT
-- **Docs:** drf-yasg (Swagger)
-- **Config:** django-environ (`.env`)
-- **DB:** PostgreSQL
-- **Seeding:** Faker
+- **Backend:** Django, Django REST Framework, django-filter  
+- **Auth:** SimpleJWT (JWT-based authentication)  
+- **Docs:** drf-yasg (Swagger UI)  
+- **DB:** PostgreSQL (via `django-environ`)  
+- **Seeding:** Faker (sample employees, attendance, performance)  
+- **Server:** Gunicorn + WhiteNoise (for static files)  
 
 ---
 
 ## ✅ Prerequisites
 
-- Python 3.10+
-- PostgreSQL 13+
-- pip (and optionally virtualenv)
-- (Windows) PowerShell recommended
+- Python 3.10+  
+- PostgreSQL 13+  
+- pip (and optionally virtualenv)  
+- (Windows) PowerShell recommended  
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Local Development
 
-### 1) Clone & Environment
+### 1. Setup Environment
+
 ```bash
-# Linux/macOS
+# Clone the repo
+git clone https://github.com/gmpranami/employee_project.git
+cd employee_project
+
+# Create env file
 cp .env.example .env
-# edit DATABASE_URL and SECRET_KEY
 ````
 
-```powershell
-# Windows PowerShell
-Copy-Item .env.example .env
-# edit DATABASE_URL and SECRET_KEY
-```
-
-`.env.example`:
+Edit `.env` and set your values:
 
 ```env
 DEBUG=True
 SECRET_KEY=change-me
 ALLOWED_HOSTS=127.0.0.1,localhost
-DATABASE_URL=postgresql://glynac:glynac@localhost:5432/employee_db
+DATABASE_URL=postgresql://user:password@localhost:5432/employee_db
 ```
 
-### 2) Install & Migrate
+### 2. Install & Migrate
 
 ```bash
 pip install -r requirements.txt
@@ -63,270 +53,152 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 3) Create Admin
+### 3. Create Superuser
 
 ```bash
 python manage.py createsuperuser
-# Username: <your_user>
-# Email: <your_email>
-# Password: <your_pass>
 ```
 
-### 4) Seed Data (sample)
+### 4. Seed Data (optional)
 
 ```bash
 python manage.py seed_data --employees 50 --days 90
-# e.g. "Seeded 50 employees, 3200 attendance rows, 151 performance rows."
 ```
 
-### 5) Run
+### 5. Run Server
 
 ```bash
 python manage.py runserver
-# http://127.0.0.1:8000
 ```
 
-**Health:** `GET /health` → `{"status":"ok"}`
-**Admin:** `http://127.0.0.1:8000/admin` (use the superuser)
-**Swagger:** `http://127.0.0.1:8000/swagger/`
+* **Health check:** [http://127.0.0.1:8000/health/](http://127.0.0.1:8000/health/) → `{"status":"ok"}`
+* **Swagger UI:** [http://127.0.0.1:8000/swagger/](http://127.0.0.1:8000/swagger/)
+* **Admin panel:** [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
 
 ---
 
 ## 🔐 Authentication (JWT)
 
-### Get tokens (Swagger)
+### 1. Get Token
 
-1. In Swagger: **POST** `/api/auth/token/`
-2. Body:
+```http
+POST /api/auth/token/
+{
+  "username": "<your_user>",
+  "password": "<your_pass>"
+}
+```
+
+Response:
 
 ```json
-{"username": "<your_user>", "password": "<your_pass>"}
+{"refresh": "<refresh>", "access": "<access>"}
 ```
 
-3. Copy `access` and `refresh`.
+### 2. Use Token
 
-Click **Authorize** (lock icon) → paste:
+Add header to all requests:
 
 ```
-Bearer <access>
+Authorization: Bearer <access>
 ```
 
-### Get tokens (PowerShell)
+### 3. Refresh Token
 
-```powershell
-$BASE  = "http://127.0.0.1:8000"
-$login = Invoke-RestMethod "$BASE/api/auth/token/" -Method Post -ContentType 'application/json' `
-  -Body (@{ username='<user>'; password='<pass>' } | ConvertTo-Json)
-
-$TOKEN   = $login.access
-$REFRESH = $login.refresh
-$HEAD    = @{ Authorization = "Bearer $TOKEN" }
-```
-
-### Refresh access (PowerShell)
-
-```powershell
-$refresh = Invoke-RestMethod "$BASE/api/auth/token/refresh/" -Method Post -ContentType 'application/json' `
-  -Body (@{ refresh=$REFRESH } | ConvertTo-Json)
-$TOKEN = $refresh.access
-$HEAD  = @{ Authorization = "Bearer $TOKEN" }
-```
-
-> **Important:** Always send `Authorization: Bearer <access>` (with a space).
-> **Dev tip:** You can extend token lifetimes in `employee_project/settings.py`:
->
-> ```python
-> from datetime import timedelta
-> SIMPLE_JWT = {
->   "ACCESS_TOKEN_LIFETIME": timedelta(hours=2),
->   "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-> }
-> ```
-
----
-
-## 🧭 API Overview (Base: `/api/v1/`)
-
-| Resource    | Endpoints                                                       | Notes                             |
-| ----------- | --------------------------------------------------------------- | --------------------------------- |
-| Employees   | `GET,POST /employees/`; `GET,PATCH,DELETE /employees/{id}/`     | Search, filter, order, pagination |
-| Departments | `GET,POST /departments/`; `GET,PATCH,DELETE /departments/{id}/` | `name` unique                     |
-| Attendance  | `GET,POST /attendance/`; `GET,PATCH,DELETE /attendance/{id}/`   | Unique `(employee, date)`         |
-| Performance | `GET,POST /performance/`; `GET,PATCH,DELETE /performance/{id}/` | rating 1..5                       |
-| Health      | `GET /health`                                                   | `{"status":"ok"}`                 |
-
-### Filters / Search / Ordering / Pagination
-
-* **Employees**
-
-  * Search: `?search=<text>`
-  * Filter: `?department=<id>&min_doj=YYYY-MM-DD&max_doj=YYYY-MM-DD`
-  * Order: `?ordering=field` or `?ordering=-field` (e.g. `-date_of_joining`)
-  * Pagination: `?page=2`
-* **Attendance**
-
-  * Filter: `?employee=<id>&status=Present|Absent|Late&min_date=YYYY-MM-DD&max_date=YYYY-MM-DD`
-* **Performance**
-
-  * Filter: `?employee=<id>&min_rating=3&max_rating=5&min_date=YYYY-MM-DD&max_date=YYYY-MM-DD`
-* **Departments**
-
-  * Search: `?search=<text>`
-  * Order: `?ordering=name`
-
----
-
-## ✍️ CRUD Examples (PowerShell)
-
-> Assume `$BASE` and `$HEAD` are set (see Auth section).
-
-### Departments
-
-```powershell
-# Create
-$dept = irm "$BASE/api/v1/departments/" -Headers $HEAD -Method Post `
-  -ContentType 'application/json' -Body (@{ name='Research' } | ConvertTo-Json)
-$DID = $dept.id
-
-# List / Search / Order
-irm "$BASE/api/v1/departments/" -Headers $HEAD | % results | ft id,name
-irm "$BASE/api/v1/departments/?search=Res" -Headers $HEAD | % results | ft id,name
-irm "$BASE/api/v1/departments/?ordering=name" -Headers $HEAD | % results | ft id,name
-
-# Update (unique name required)
-irm "$BASE/api/v1/departments/$DID/" -Headers $HEAD -Method Patch `
-  -ContentType 'application/json' -Body (@{ name='R&D HQ' } | ConvertTo-Json)
-
-# Delete
-irm "$BASE/api/v1/departments/$DID/" -Headers $HEAD -Method Delete
-```
-
-### Employees
-
-```powershell
-# Create
-$emp = irm "$BASE/api/v1/employees/" -Headers $HEAD -Method Post `
-  -ContentType 'application/json' -Body (@{
-    name='John Tester'; email='john.tester@example.com'; phone_number='12345';
-    address='42 Test Street'; date_of_joining='2024-08-15'; department=$DID
-  } | ConvertTo-Json)
-$EID = $emp.id
-
-# Get / Search / Filter / Order / Page
-irm "$BASE/api/v1/employees/$EID/" -Headers $HEAD
-irm "$BASE/api/v1/employees/?search=John" -Headers $HEAD | Select-Object count
-irm "$BASE/api/v1/employees/?department=$DID&min_doj=2024-01-01&max_doj=2025-12-31" -Headers $HEAD | Select-Object count
-irm "$BASE/api/v1/employees/?ordering=-date_of_joining" -Headers $HEAD | % results | Select-Object -First 3 name,date_of_joining
-irm "$BASE/api/v1/employees/?page=2" -Headers $HEAD | Select-Object count,next,previous
-
-# Update
-irm "$BASE/api/v1/employees/$EID/" -Headers $HEAD -Method Patch `
-  -ContentType 'application/json' -Body (@{ phone_number='99999' } | ConvertTo-Json)
-
-# Delete
-irm "$BASE/api/v1/employees/$EID/" -Headers $HEAD -Method Delete
-```
-
-### Attendance
-
-```powershell
-# Create
-irm "$BASE/api/v1/attendance/" -Headers $HEAD -Method Post `
-  -ContentType 'application/json' -Body (@{
-    employee=$EID; date='2025-09-01'; status='Present'
-  } | ConvertTo-Json)
-
-# Duplicate (should 400) — (employee, date) must be unique
-try {
-  irm "$BASE/api/v1/attendance/" -Headers $HEAD -Method Post `
-    -ContentType 'application/json' -Body (@{
-      employee=$EID; date='2025-09-01'; status='Late'
-    } | ConvertTo-Json)
-} catch { "Expected 400 -> HTTP " + $_.Exception.Response.StatusCode.value__ }
-
-# Filter
-irm "$BASE/api/v1/attendance/?employee=$EID&status=Present&min_date=2025-08-01&max_date=2025-09-30" `
-  -Headers $HEAD | Select-Object count
-```
-
-### Performance
-
-```powershell
-# Create
-irm "$BASE/api/v1/performance/" -Headers $HEAD -Method Post `
-  -ContentType 'application/json' -Body (@{
-    employee=$EID; rating=4; review_date='2025-08-20'
-  } | ConvertTo-Json)
-
-# Filter
-irm "$BASE/api/v1/performance/?min_rating=4&min_date=2024-01-01" -Headers $HEAD | Select-Object count
+```http
+POST /api/auth/token/refresh/
+{"refresh": "<refresh>"}
 ```
 
 ---
 
-## 📚 Swagger
+## 🧭 API Overview
 
-* `http://127.0.0.1:8000/swagger/`
-* Get tokens via **POST /api/auth/token/**
-* Click **Authorize** → paste `Bearer <access>`
-* “Try it out” on any endpoint
+**Base path:** `/api/v1/`
 
-If you get **401**, refresh your token or re-login.
+| Resource    | Endpoints                                                       |
+| ----------- | --------------------------------------------------------------- |
+| Employees   | `GET,POST /employees/`; `GET,PATCH,DELETE /employees/{id}/`     |
+| Departments | `GET,POST /departments/`; `GET,PATCH,DELETE /departments/{id}/` |
+| Attendance  | `GET,POST /attendance/`; `GET,PATCH,DELETE /attendance/{id}/`   |
+| Performance | `GET,POST /performance/`; `GET,PATCH,DELETE /performance/{id}/` |
+| Health      | `GET /health`                                                   |
 
----
-
-## 📊 Charts (Bonus)
-
-* Page: `http://127.0.0.1:8000/analytics/charts/`
-
-  * **Pie:** Employees per Department
-  * **Bar:** Monthly Attendance
-* JSON:
-
-  * `/analytics/charts/data/employees-per-department/`
-  * `/analytics/charts/data/monthly-attendance/`
+Supports: filtering, searching, ordering, pagination.
 
 ---
 
-## 🧪 Quick Checks & Counts
+## 🌐 Deployment (Render)
 
-```powershell
-# counts (proof after seeding)
-(irm "$BASE/api/v1/employees/"   -Headers $HEAD).count
-(irm "$BASE/api/v1/attendance/"  -Headers $HEAD).count
-(irm "$BASE/api/v1/performance/" -Headers $HEAD).count
+This project is configured for **Render** using `render.yaml`.
+
+### 1. Deploy
+
+* Connect GitHub repo to [Render](https://render.com)
+* Select **Blueprint** → branch `main`
+* Render provisions:
+
+  * Web service (Django + Gunicorn)
+  * PostgreSQL database (`employee-db`)
+
+### 2. Auto Environment Vars (from `render.yaml`)
+
+* `DATABASE_URL` → auto from `employee-db`
+* `SECRET_KEY` → auto generated
+* `ALLOWED_HOSTS` → `.onrender.com,localhost,127.0.0.1`
+
+### 3. Live Links (after deploy)
+
+* **Health:** [https://employee-project-pza8.onrender.com/health/](https://employee-project-pza8.onrender.com/health/)
+* **Swagger:** [https://employee-project-pza8.onrender.com/swagger/](https://employee-project-pza8.onrender.com/swagger/)
+* **Admin:** [https://employee-project-pza8.onrender.com/admin/](https://employee-project-pza8.onrender.com/admin/)
+
+### 4. Create Superuser on Render
+
+From **Render Dashboard → employee-project → Shell**:
+
+```bash
+python manage.py createsuperuser
 ```
 
-**Negative tests**
-
-```powershell
-# 401 (no token)
-try { irm "$BASE/api/v1/employees/" } catch { "HTTP " + $_.Exception.Response.StatusCode.value__ }
-
-# 404 (bad id)
-try { irm "$BASE/api/v1/employees/999999/" -Headers $HEAD } catch { "HTTP " + $_.Exception.Response.StatusCode.value__ }
-
-# 400 (bad payload)
-try {
-  irm "$BASE/api/v1/departments/" -Headers $HEAD -Method Post -ContentType 'application/json' -Body (@{} | ConvertTo-Json)
-} catch { "HTTP " + $_.Exception.Response.StatusCode.value__ }
-```
+Then login at `/admin/`.
 
 ---
 
-## 🧰 Common Errors & Fixes
+## 📚 Swagger Docs
 
-| Error                    | Cause                                     | Fix                                                               |
-| ------------------------ | ----------------------------------------- | ----------------------------------------------------------------- |
-| 401 Unauthorized         | Missing/expired token or missing `Bearer` | Get new tokens, set header `Authorization: Bearer <access>`       |
-| Token expired            | Access tokens are short-lived             | Use `POST /api/auth/token/refresh/` with `refresh` or login again |
-| 400 Attendance duplicate | `(employee, date)` unique                 | Update existing record or choose a different date                 |
-| 400 Dept duplicate name  | `Department.name` unique                  | Use a different name (e.g., add suffix)                           |
-| 404 Not Found            | ID doesn’t exist                          | List first, then use an existing id                               |
-| DB connection error      | Postgres not running / wrong URL          | Start DB, verify `DATABASE_URL`                                   |
-| Invalid host header      | Host not in `ALLOWED_HOSTS`               | Add to `.env`: `ALLOWED_HOSTS=127.0.0.1,localhost`                |
+* Local: `http://127.0.0.1:8000/swagger/`
+* Render: `https://employee-project-pza8.onrender.com/swagger/`
 
-#   e m p l o y e e _ p r o j e c t 
- 
- 
+---
 
+## 🧰 Common Issues
+
+| Error                         | Fix                                                              |
+| ----------------------------- | ---------------------------------------------------------------- |
+| `DisallowedHost`              | Add `.onrender.com` to `ALLOWED_HOSTS`                           |
+| `gunicorn: command not found` | Ensure `gunicorn` in requirements.txt                            |
+| `psycopg2 not found`          | Ensure `psycopg2-binary` in requirements.txt                     |
+| Static files not loading      | Add `whitenoise.middleware.WhiteNoiseMiddleware` to `MIDDLEWARE` |
+| `401 Unauthorized`            | Use JWT token in `Authorization` header                          |
+
+---
+
+## 📊 Bonus (Charts)
+
+* Employees per Department
+* Monthly Attendance
+
+Endpoints:
+
+* `/analytics/charts/` (HTML charts)
+* `/analytics/charts/data/employees-per-department/`
+* `/analytics/charts/data/monthly-attendance/`
+
+---
+
+## License
+
+MIT License.
+
+````
