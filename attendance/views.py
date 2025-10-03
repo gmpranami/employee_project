@@ -1,12 +1,18 @@
+"""
+ViewSets for Attendance and Performance APIs.
+Supports filtering, search, and ordering.
+JWT authentication required.
+"""
+
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-
 from .models import Attendance
 from .serializers import AttendanceSerializer, PerformanceSerializer
 from employees.models import Performance
 
 class AttendanceViewSet(viewsets.ModelViewSet):
+    """CRUD API for employee attendance records."""
     queryset = Attendance.objects.select_related("employee", "employee__department").all()
     serializer_class = AttendanceSerializer
     permission_classes = [IsAuthenticated]
@@ -19,7 +25,9 @@ class AttendanceViewSet(viewsets.ModelViewSet):
     ordering_fields = ["date", "employee"]
     search_fields = ["employee__name", "employee__email", "employee__department__name"]
 
+
 class PerformanceViewSet(viewsets.ModelViewSet):
+    """CRUD API for employee performance reviews."""
     queryset = Performance.objects.select_related("employee", "employee__department").all()
     serializer_class = PerformanceSerializer
     permission_classes = [IsAuthenticated]

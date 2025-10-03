@@ -1,14 +1,17 @@
 """
-WSGI config for employee_project project.
+WSGI config for employee_project.
 
-It exposes the WSGI callable as a module-level variable named ``application``.
+This file exposes the WSGI callable as a module-level variable named ``application``.
 
-For more information on this file, see
-https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/
+WSGI (Web Server Gateway Interface) is the entry point for web servers
+like Gunicorn or uWSGI to serve your Django project in production.
 """
 
-# wsgi.py
 import os
 from django.core.wsgi import get_wsgi_application
+
+# Set the default Django settings module for WSGI deployment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "employee_project.settings")
+
+# The WSGI application object used by WSGI servers
 application = get_wsgi_application()

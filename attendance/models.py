@@ -1,14 +1,18 @@
+"""
+Attendance model for tracking employee presence on given dates.
+"""
+
 from django.db import models
 from employees.models import Employee
 
 class Attendance(models.Model):
     STATUS_PRESENT = "Present"
-    STATUS_ABSENT  = "Absent"
-    STATUS_LATE    = "Late"
+    STATUS_ABSENT = "Absent"
+    STATUS_LATE = "Late"
     STATUS_CHOICES = (
         (STATUS_PRESENT, "Present"),
-        (STATUS_ABSENT,  "Absent"),
-        (STATUS_LATE,    "Late"),
+        (STATUS_ABSENT, "Absent"),
+        (STATUS_LATE, "Late"),
     )
 
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="attendance")
