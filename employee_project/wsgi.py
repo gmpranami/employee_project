@@ -10,8 +10,19 @@ like Gunicorn or uWSGI to serve your Django project in production.
 import os
 from django.core.wsgi import get_wsgi_application
 
-# Set the default Django settings module for WSGI deployment
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "employee_project.settings")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'employee_project.settings')
 
-# The WSGI application object used by WSGI servers
 application = get_wsgi_application()
+
+# --- Auto-create superuser for Render deployment (silent) ---
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    if not User.objects.filter(username="glynac").exists():
+        User.objects.create_superuser(
+            username="glynac",
+            email="glynac@example.com",
+            password="glynac"
+        )
+except Exception:
+    pass
