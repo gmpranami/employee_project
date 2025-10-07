@@ -6,30 +6,11 @@ Department serialization is imported from the departments app.
 """
 
 from rest_framework import serializers
-from departments.models import Department
-from departments.serializers import DepartmentSerializer
 from .models import Employee, Performance
 
-
 class EmployeeSerializer(serializers.ModelSerializer):
-    """
-    Serialize Employee data.
-    Includes nested Department info (read-only)
-    and a department_id field for write operations.
-    """
+    """Basic serializer without nested department to test API stability."""
 
-    # Nested department info (read-only, allow null safely)
-    department = DepartmentSerializer(read_only=True, allow_null=True)
-
-    # Accept department_id when creating/updating employees
-    department_id = serializers.PrimaryKeyRelatedField(
-        queryset=Department.objects.all(),
-        source="department",
-        write_only=True,
-        required=False,
-        allow_null=True,
-        help_text="Select department by ID when creating or updating an employee."
-    )
     class Meta:
         model = Employee
         fields = [
@@ -39,18 +20,12 @@ class EmployeeSerializer(serializers.ModelSerializer):
             "phone_number",
             "address",
             "date_of_joining",
-            "department",
-            "department_id",
+            "department_id",  # Only show ID
         ]
 
 
 class PerformanceSerializer(serializers.ModelSerializer):
-    """
-    Serialize Performance records, showing employee names for clarity.
-    """
-
-    employee_name = serializers.CharField(source="employee.name", read_only=True)
-
+    """Performance serializer (unchanged)."""
     class Meta:
         model = Performance
-        fields = ["id", "employee", "employee_name", "rating", "review_date"]
+        fields = ["id", "employee", "rating", "review_date"]
