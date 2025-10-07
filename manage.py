@@ -8,32 +8,43 @@ def main():
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
-        raise ImportError(
-            "Couldn't import Django."
-        ) from exc
+        raise ImportError("Couldn't import Django.") from exc
 
-    # ------------------------------------------------------------
-    # AUTO-FIX for InconsistentMigrationHistory on Render
-    # Runs ONLY when the command is 'migrate'.
-    # It fakes employees back to zero so departments can apply first.
-    # You can disable by setting AUTO_FIX_MIGRATIONS=0 in env.
-    # ------------------------------------------------------------
     args = sys.argv[:]
-    if len(args) >= 2 and args[1] == "migrate" and os.environ.get("AUTO_FIX_MIGRATIONS", "1") == "1":
+    is_migrate = len(args) >= 2 and args[1] == "migrate"
+    auto_fix = os.environ.get("AUTO_FIX_MIGRATIONS", "1") == "1"
+
+    if is_migrate and auto_fix:
+        # --- Step 0: ensure employees depends on departments in code ---
+        # Make sure employees/migrations/0001_initial.py has:
+        # dependencies = [('departments', '0001_initial')]
+        # (commit that change if it wasn't there)
+
         try:
-            # 1) logically unapply employees to clear wrong order
+            # Step A: logically unapply employees (no table drops)
             execute_from_command_line([args[0], "migrate", "employees", "zero", "--fake"])
         except Exception as e:
-            print(f"[warn] Pre-fix (fake unapply employees) failed: {e}")
+            print(f"[warn] Could not fake-unapply employees: {e}")
 
         try:
-            # 2) apply everything; --fake-initial helps if tables already exist
-            execute_from_command_line([args[0], "migrate", "--noinput", "--fake-initial"])
-            return  # we're done; avoid a second migrate call below
+            # Step B: logically mark departments initial as applied (if tables exist)
+            # If already applied, this is a no-op; if not, it marks it.
+            execute_from_command_line([args[0], "migrate", "departments", "0001", "--fake"])
         except Exception as e:
-            print(f"[warn] Main migrate (with --fake-initial) failed, falling back: {e}")
+            print(f"[warn] Could not fake-apply departments.0001: {e}")
 
-    # Normal execution for all other commands
+        try:
+            # Step C: now do a normal migrate (with --fake-initial for existing tables)
+            execute_from_command_line([args[0], "migrate", "--noinput", "--fake-initial"])
+            # Important: exit so the outer Render command doesn't run migrate again.
+            sys.exit(0)
+        except Exception as e:
+            print(f"[fatal] Auto-fix migrate failed: {e}")
+            # Fail fast so you can see the error
+            sys.exit(1)
+
+    # Default path (non-migrate commands, or auto-fix disabled)
+    from django.core.management import execute_from_command_line
     execute_from_command_line(sys.argv)
 
 if __name__ == '__main__':
