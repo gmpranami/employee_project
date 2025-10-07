@@ -18,17 +18,18 @@ class EmployeeSerializer(serializers.ModelSerializer):
     and a department_id field for write operations.
     """
 
-    # Nested department info (read-only)
-    department = DepartmentSerializer(read_only=True)
+    # Nested department info (read-only, allow null safely)
+    department = DepartmentSerializer(read_only=True, allow_null=True)
 
     # Accept department_id when creating/updating employees
     department_id = serializers.PrimaryKeyRelatedField(
         queryset=Department.objects.all(),
-        source="department",          # Map to ForeignKey field
+        source="department",
         write_only=True,
+        required=False,
+        allow_null=True,
         help_text="Select department by ID when creating or updating an employee."
     )
-
     class Meta:
         model = Employee
         fields = [
