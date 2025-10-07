@@ -190,3 +190,11 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": "INFO"},
 }
+
+# ---- TEMP: bypass migrations for employees & departments on Render ----
+# Activate by setting DISABLE_APP_MIGRATIONS=1 in Render env.
+if os.environ.get("DISABLE_APP_MIGRATIONS") == "1":
+    MIGRATION_MODULES = {
+        "employees": None,
+        "departments": None,
+    }
