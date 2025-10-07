@@ -1,10 +1,5 @@
 from django.contrib import admin
-from .models import Department, Employee, Performance
-
-@admin.register(Department)
-class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ("id", "name")
-    search_fields = ("name",)
+from .models import Employee, Performance
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):

@@ -9,7 +9,7 @@ Department model has been moved to the departments app.
 """
 
 from django.db import models
-from departments.models import Department
+
 
 
 class Employee(models.Model):
@@ -39,12 +39,13 @@ class Employee(models.Model):
         help_text="The date the employee joined the organization."
     )
 
-    # Many employees → one department
     department = models.ForeignKey(
-    Department,
-    on_delete=models.SET_NULL,
-    null=True,
-    related_name="employees"    
+        "departments.Department",   # ← string reference = safer
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,                 # (optional but nice for admin/forms)
+        related_name="employees",
+        db_index=True,
     )
 
 
