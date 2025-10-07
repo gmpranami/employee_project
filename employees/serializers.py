@@ -6,10 +6,19 @@ Department serialization is imported from the departments app.
 """
 
 from rest_framework import serializers
+from departments.models import Department
+from departments.serializers import DepartmentSerializer
 from .models import Employee, Performance
 
 class EmployeeSerializer(serializers.ModelSerializer):
-    """Basic serializer without nested department to test API stability."""
+    department = DepartmentSerializer(read_only=True, allow_null=True)
+    department_id = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(),
+        source="department",
+        write_only=True,
+        required=False,
+        allow_null=True
+    )
 
     class Meta:
         model = Employee
@@ -20,12 +29,14 @@ class EmployeeSerializer(serializers.ModelSerializer):
             "phone_number",
             "address",
             "date_of_joining",
-            "department_id",  # Only show ID
+            "department",
+            "department_id",
         ]
 
 
 class PerformanceSerializer(serializers.ModelSerializer):
-    """Performance serializer (unchanged)."""
+    employee_name = serializers.CharField(source="employee.name", read_only=True)
+
     class Meta:
         model = Performance
-        fields = ["id", "employee", "rating", "review_date"]
+        fields = ["id", "employee", "employee_name", "rating", "review_date"]
