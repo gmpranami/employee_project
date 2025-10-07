@@ -202,7 +202,8 @@ if os.environ.get("DISABLE_APP_MIGRATIONS") == "1":
 if os.environ.get("RENDER") == "true":
     from django.core.management import call_command
     try:
+        call_command("fix_migrations")
         call_command("migrate", "--fake-initial")
-        call_command("fix_departments_table")
+        print("✅ Render startup fix executed successfully.")
     except Exception as e:
-        print(f"⚠️ Startup migration fix failed: {e}")
+        print(f"⚠️ Render startup fix failed: {e}")
