@@ -198,3 +198,11 @@ if os.environ.get("DISABLE_APP_MIGRATIONS") == "1":
         "employees": None,
         "departments": None,
     }
+
+if os.environ.get("RENDER") == "true":
+    from django.core.management import call_command
+    try:
+        call_command("migrate", "--fake-initial")
+        call_command("fix_departments_table")
+    except Exception as e:
+        print(f"⚠️ Startup migration fix failed: {e}")
