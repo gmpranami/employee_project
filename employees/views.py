@@ -1,5 +1,5 @@
 """
-ViewSets for Departments and Employees.
+ViewSets for Employees and Performance.
 Provides CRUD APIs with filtering, search, and ordering.
 JWT authentication required for all endpoints.
 """
@@ -7,17 +7,8 @@ JWT authentication required for all endpoints.
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Department, Employee
-from .serializers import DepartmentSerializer, EmployeeSerializer
-
-class DepartmentViewSet(viewsets.ModelViewSet):
-    """CRUD API for departments."""
-    queryset = Department.objects.all()
-    serializer_class = DepartmentSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ["name"]
-    ordering_fields = ["name"]
+from .models import Employee, Performance
+from .serializers import EmployeeSerializer, PerformanceSerializer
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
@@ -32,3 +23,14 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     }
     search_fields = ["name", "email", "phone_number", "address", "department__name"]
     ordering_fields = ["name", "date_of_joining", "department__name"]
+
+
+class PerformanceViewSet(viewsets.ModelViewSet):
+    """CRUD API for performance reviews."""
+    queryset = Performance.objects.select_related("employee").all()
+    serializer_class = PerformanceSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
+    filterset_fields = {"employee": ["exact"], "rating": ["gte", "lte"]}
+    search_fields = ["employee__name", "employee__email"]
+    ordering_fields = ["rating", "review_date"]

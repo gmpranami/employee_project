@@ -1,11 +1,12 @@
-from django.urls import path, include
+"""
+Defines API routes for Employees and Performance endpoints.
+"""
+
 from rest_framework.routers import DefaultRouter
-from .views import DepartmentViewSet, EmployeeViewSet
+from .views import EmployeeViewSet, PerformanceViewSet
 
 router = DefaultRouter()
-router.register(r"departments", DepartmentViewSet, basename="department")
 router.register(r"employees", EmployeeViewSet, basename="employee")
+router.register(r"performance", PerformanceViewSet, basename="performance")
 
-urlpatterns = [
-    path("", include(router.urls)),
-]
+urlpatterns = router.urls

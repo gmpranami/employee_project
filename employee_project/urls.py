@@ -1,13 +1,14 @@
 """
 URL configuration for the Employee Management System.
+
 Includes:
-- Admin site
-- API routes (Employees, Departments, Attendance, Performance)
-- JWT authentication endpoints
-- Swagger docs
-- Analytics (charts)
-- Health check
-- Root redirect → /swagger/
+- Admin panel
+- Core API routes (Employees, Departments, Attendance, Performance)
+- JWT authentication (login & refresh)
+- Swagger documentation
+- Analytics app (charts/visuals)
+- Health check endpoint
+- Root redirect → /swagger/ for easy navigation
 """
 
 from django.contrib import admin
@@ -19,36 +20,69 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from django.http import JsonResponse
 
-# Swagger schema view
+
+# --------------------------------------------------------------------
+# SWAGGER SCHEMA VIEW CONFIGURATION
+# --------------------------------------------------------------------
 schema_view = get_schema_view(
-    openapi.Info(title="Employee API", default_version="v1"),
+    openapi.Info(
+        title="Employee Management API",            # Project title
+        default_version="v1",
+        description=(
+            "Comprehensive API documentation for managing Employees, "
+            "Departments, Attendance, Performance, and Analytics."
+        ),
+    ),
     public=True,
     permission_classes=(permissions.AllowAny,),
 )
 
-# Healthcheck endpoint
+
+# --------------------------------------------------------------------
+# HEALTH CHECK ENDPOINT
+# --------------------------------------------------------------------
 def health(_):
+    """Simple JSON health check endpoint for uptime monitoring."""
     return JsonResponse({"status": "ok"})
 
-# Redirect root → Swagger
+
+# --------------------------------------------------------------------
+# ROOT REDIRECT
+# --------------------------------------------------------------------
 def root_redirect(request):
+    """Redirect root URL (/) to Swagger documentation."""
     return redirect("/swagger/", permanent=False)
 
-# URL patterns
+
+# --------------------------------------------------------------------
+# MAIN URL PATTERNS
+# --------------------------------------------------------------------
 urlpatterns = [
+    # Django admin site
     path("admin/", admin.site.urls),
 
-    # ✅ include app-level urls
-    path("api/v1/", include("employees.urls")),
-    path("api/v1/", include("attendance.urls")),
+    # --- Core API routes ---
+    path("api/v1/", include("employees.urls")),       # Employees & Performance
+    path("api/v1/", include("attendance.urls")),      # Attendance records
+    path("api/v1/", include("departments.urls")),     # Departments 
 
-    # Auth (JWT)
+    # --- JWT Authentication (Token generation and refresh) ---
     path("api/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
-    # Swagger & extras
+    # --- Swagger API Documentation ---
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
-    path("analytics/", include("analytics.urls")),
+
+    # --- Analytics routes (bonus feature) ---
+     path("api/v1/analytics/", include("analytics.urls")),
+
+    # --- Health check (useful for Render deployment monitoring) ---
     path("health/", health),
+
+    path("api-auth/", include("rest_framework.urls")),  # adds login/logout
+
+    # --- Redirect root (/) to Swagger UI ---
     path("", root_redirect),
+
+    
 ]
