@@ -1,5 +1,5 @@
 """
-Custom Django management command to seed the database with:
+Custom Django management command to safely seed the database with:
 - Departments (from departments app)
 - Employees
 - Attendance records
@@ -7,10 +7,6 @@ Custom Django management command to seed the database with:
 
 Usage:
     python manage.py seed_data --employees 50 --days 90
-
-This script uses the Faker library to generate realistic data for
-testing or demo purposes. It can be safely re-run without creating
-duplicate departments.
 """
 
 from django.core.management.base import BaseCommand
@@ -18,8 +14,9 @@ from django.utils import timezone
 from faker import Faker
 import random
 from datetime import timedelta, date
+from django.db import transaction
 
-# ✅ Updated imports (Department now lives in its own app)
+# ✅ Imports
 from departments.models import Department
 from employees.models import Employee, Performance
 from attendance.models import Attendance
@@ -28,13 +25,9 @@ fake = Faker()
 
 
 # ---------------------------------------------------------------------
-# Helper function: date generator
+# Helper: date generator
 # ---------------------------------------------------------------------
 def daterange(start: date, end: date):
-    """
-    Generator that yields every date between start and end (inclusive).
-    Used to easily create attendance records for each day.
-    """
     for n in range(int((end - start).days) + 1):
         yield start + timedelta(n)
 
@@ -43,23 +36,9 @@ def daterange(start: date, end: date):
 # Command definition
 # ---------------------------------------------------------------------
 class Command(BaseCommand):
-    """
-    Seeds the database with departments, employees, attendance,
-    and performance records for development or testing environments.
-
-    Arguments:
-        --employees : number of employees to create (default=50)
-        --days      : number of days of attendance data (default=90)
-    """
-
-    help = "Seed departments, employees, attendance, and performance data."
+    help = "Seed departments, employees, attendance, and performance data safely."
 
     def add_arguments(self, parser):
-        """
-        Allow command-line arguments for custom dataset sizes.
-        Example:
-            python manage.py seed_data --employees 100 --days 180
-        """
         parser.add_argument(
             "--employees",
             type=int,
@@ -73,28 +52,34 @@ class Command(BaseCommand):
             help="Number of days of attendance data to generate (default=90)"
         )
 
+    @transaction.atomic
     def handle(self, *args, **opts):
-        """
-        Main execution method. Runs automatically when the command is called.
-        Creates departments, employees, attendance, and performance data.
-        """
         n_emp = opts["employees"]
         days = opts["days"]
 
-        # --------------------------------------------------------------
-        # Step 1: Create departments
-        # --------------------------------------------------------------
-        dept_names = ["Engineering", "Research", "HR", "Finance", "Marketing", "Sales", "Support"]
-        depts = []
+        # 🚨 Skip if already seeded
+        if Employee.objects.exists():
 
+        # --------------------------------------------------------------
+        # Step 1: Create or get departments
+        # --------------------------------------------------------------
+            dept_names = ["Engineering", "Research", "HR", "Finance", "Marketing", "Sales", "Support"]
+            depts = []
         for name in dept_names:
-            dept, _ = Department.objects.get_or_create(name=name)
+            dept, created = Department.objects.get_or_create(name=name)
             depts.append(dept)
-
-        self.stdout.write("Created or found all departments.")
+        self.stdout.write(self.style.SUCCESS("✅ Departments ready."))
 
         # --------------------------------------------------------------
-        # Step 2: Create employees
+        # Step 2: Clear old data (optional, for safe reseeding)
+        # --------------------------------------------------------------
+        Attendance.objects.all().delete()
+        Performance.objects.all().delete()
+        Employee.objects.all().delete()
+        self.stdout.write("🧹 Old employee, attendance, and performance data cleared.")
+
+        # --------------------------------------------------------------
+        # Step 3: Create employees
         # --------------------------------------------------------------
         employees = []
         for _ in range(n_emp):
@@ -109,10 +94,10 @@ class Command(BaseCommand):
             )
             employees.append(emp)
 
-        self.stdout.write(f"Created {len(employees)} employees.")
+        self.stdout.write(self.style.SUCCESS(f"👥 Created {len(employees)} employees."))
 
         # --------------------------------------------------------------
-        # Step 3: Create attendance and performance data
+        # Step 4: Create attendance & performance
         # --------------------------------------------------------------
         start_date = timezone.now().date() - timedelta(days=days)
         end_date = timezone.now().date()
@@ -121,11 +106,10 @@ class Command(BaseCommand):
         perf_count = 0
 
         for emp in employees:
-            # --- Attendance for weekdays only ---
+            # Attendance for weekdays only
             for dt in daterange(start_date, end_date):
-                if dt.weekday() >= 5:  # Skip weekends (Saturday/Sunday)
+                if dt.weekday() >= 5:  # Skip weekends
                     continue
-
                 status = random.choices(
                     [
                         Attendance.STATUS_PRESENT,
@@ -135,15 +119,10 @@ class Command(BaseCommand):
                     weights=[0.85, 0.07, 0.08],
                     k=1,
                 )[0]
-
-                Attendance.objects.get_or_create(
-                    employee=emp,
-                    date=dt,
-                    defaults={"status": status},
-                )
+                Attendance.objects.create(employee=emp, date=dt, status=status)
                 att_count += 1
 
-            # --- Performance reviews ---
+            # Performance reviews
             for _ in range(random.randint(2, 5)):
                 Performance.objects.create(
                     employee=emp,
@@ -153,11 +132,14 @@ class Command(BaseCommand):
                 perf_count += 1
 
         # --------------------------------------------------------------
-        # Step 4: Summary output
+        # Step 5: Summary output
         # --------------------------------------------------------------
         self.stdout.write(
             self.style.SUCCESS(
-                f"Seed complete: {len(employees)} employees, "
-                f"{att_count} attendance records, and {perf_count} performance reviews created successfully."
+                f"🎉 Seeding complete:\n"
+                f"   • Departments: {len(depts)}\n"
+                f"   • Employees: {len(employees)}\n"
+                f"   • Attendance records: {att_count}\n"
+                f"   • Performance reviews: {perf_count}"
             )
         )
