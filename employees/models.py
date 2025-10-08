@@ -9,6 +9,8 @@ Department model has been moved to the departments app.
 """
 
 from django.db import models
+from departments.models import Department
+
 
 
 
@@ -40,14 +42,10 @@ class Employee(models.Model):
     )
 
     department = models.ForeignKey(
-        "departments.Department",   # ← string reference = safer
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,                 # (optional but nice for admin/forms)
-        related_name="employees",
-        db_index=True,
-    )
-
+    Department,
+    on_delete=models.CASCADE,
+    related_name="employees"
+)
 
     class Meta:
         # Database-level optimizations
