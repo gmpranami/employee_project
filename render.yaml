@@ -7,7 +7,9 @@ services:
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
     startCommand: >
-      python manage.py migrate &&
+      python manage.py migrate --noinput &&
+      python manage.py create_render_superuser &&
+      python manage.py seed_data &&
       gunicorn employee_project.wsgi:application --workers=2 --threads=4 --timeout=120 --bind 0.0.0.0:$PORT
     autoDeploy: true
     healthCheckPath: /health
@@ -24,6 +26,7 @@ services:
         fromDatabase:
           name: employee-db
           property: connectionString
+
 databases:
   - name: employee-db
     plan: free
