@@ -100,14 +100,7 @@ WSGI_APPLICATION = "employee_project.wsgi.application"
 # ---------------------------------------------------------------------
 # Point default to your real DB. You can still override with DATABASE_URL in .env
 DATABASES = {
-    "default": dj_database_url.config(
-        default=config(
-            "DATABASE_URL",
-            # UPDATED: matches your working connection (employee_db, glynac/glynac)
-            default="postgres://glynac:glynac@localhost:5432/employee_db",
-        ),
-        conn_max_age=600,
-    )
+    "default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
 }
 
 # ---------------------------------------------------------------------
