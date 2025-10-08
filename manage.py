@@ -13,8 +13,11 @@ def main():
     if os.environ.get("RENDER") == "1":
         try:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM django_migrations WHERE app IN ('employees', 'departments');")
-            print("✅ Cleared inconsistent migration history for employees & departments.")
+                cursor.execute("""
+                    DELETE FROM django_migrations
+                    WHERE app IN ('employees', 'departments', 'attendance');
+                """)
+            print("✅ Cleared inconsistent migration history for employees, departments, and attendance.")
         except Exception as e:
             print(f"⚠️ Migration cleanup skipped: {e}")
     # ---------------------------------------------------
