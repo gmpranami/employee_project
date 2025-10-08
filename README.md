@@ -1,147 +1,241 @@
-Employee Management System (Django + DRF)
-A modular Django project for managing Employees, Departments, Attendance, and Performance.
-Includes JWT authentication, Swagger docs, PostgreSQL, and optional seeding for demo data.
+🧑‍💼 Employee Management System (Django + DRF)
 
-🔧 Tech Stack
-Backend: Django, Django REST Framework, django-filter
-Auth: SimpleJWT (JWT-based authentication)
-Docs: drf-yasg (Swagger UI)
-DB: PostgreSQL (via django-environ)
-Seeding: Faker (sample employees, attendance, performance)
-Server: Gunicorn + WhiteNoise (for static files)
-✅ Prerequisites
-Python 3.10+
-PostgreSQL 13+
-pip (and optionally virtualenv)
-(Windows) PowerShell recommended
-🚀 Local Development
-1. Setup Environment
-# Clone the repo
+A complete Employee Management System built using Django and Django REST Framework (DRF).
+It allows you to manage Employees, Departments, Attendance, and Performance through both an interactive Swagger API and the Django Admin Panel.
+
+This system includes:
+
+🛡️ JWT Authentication (using SimpleJWT)
+
+📘 Swagger API Documentation
+
+🗄️ PostgreSQL Database Integration
+
+🧠 Automatic Data Seeding with Faker
+
+☁️ Production Deployment on Render
+
+🌟 Overview
+
+This project is designed as a backend API for a corporate HR system.
+It enables HR managers or admins to:
+
+➕ Add, update, or delete employees and departments
+
+🕒 Record and view attendance and performance data
+
+⚙️ Manage all data through a centralized admin panel
+
+🔐 Use JWT-based authentication for secure API access
+
+📘 View and test APIs through Swagger
+
+The system is structured with modular Django apps:
+
+employees/ – Handles employee and performance data
+
+departments/ – Manages department records
+
+attendance/ – Tracks attendance
+
+analytics/ – Optional extension for analytics and charts
+
+⚙️ Tech Stack
+Component	Technology
+Framework	Django 5 + Django REST Framework
+Authentication	SimpleJWT (JWT Tokens)
+Documentation	drf-yasg (Swagger UI)
+Database	PostgreSQL (via django-environ)
+Demo Data	Faker
+Server (Prod)	Gunicorn + WhiteNoise
+Hosting	Render Cloud Platform
+🧩 Features
+
+✅ CRUD operations for Employees, Departments, Attendance, and Performance
+✅ JWT authentication for secure API access
+✅ Swagger-based API documentation
+✅ Search, filter, and pagination support
+✅ Health check endpoint for Render uptime
+✅ Automatic demo data seeding (optional)
+✅ Deployable with PostgreSQL on Render
+
+🧠 How It Works
+
+The backend provides RESTful APIs for managing employee-related data.
+
+Each app (employees, departments, attendance) exposes routes via /api/v1/.
+
+Authentication uses JWT tokens (/api/auth/token/ and /api/auth/token/refresh/).
+
+Swagger UI (/swagger/) lets you test APIs interactively.
+
+Admin users can log in via /admin/ to manage all records visually.
+
+🧭 Live Demo (Render Deployment)
+Feature	URL
+🩺 Health Check	https://employee-project-pza8.onrender.com/health/
+
+📘 Swagger Docs	https://employee-project-pza8.onrender.com/swagger/
+
+⚙️ Admin Panel	https://employee-project-pza8.onrender.com/admin/
+
+🔑 Log in to /admin/ using your superuser credentials after creating one via Render Shell.
+
+🧰 Local Setup Guide
+1️⃣ Clone the Repository
 git clone https://github.com/gmpranami/employee_project.git
 cd employee_project
 
-# Create env file
+2️⃣ Create Environment File
 cp .env.example .env
-Edit .env and set your values:
+
+
+Edit .env with:
 
 DEBUG=True
 SECRET_KEY=change-me
 ALLOWED_HOSTS=127.0.0.1,localhost
-DATABASE_URL=postgresql://user:password@localhost:5432/employee_db
-2. Install & Migrate
+DATABASE_URL=postgresql://<username>:<password>@localhost:5432/employee_db
+
+3️⃣ Install Dependencies
 pip install -r requirements.txt
+
+4️⃣ Apply Migrations
 python manage.py makemigrations
 python manage.py migrate
-3. Create Superuser
+
+5️⃣ Create Superuser
 python manage.py createsuperuser
-4. Seed Data (optional)
-python manage.py seed_data --employees 50 --days 90
-5. Run Server
+
+6️⃣ (Optional) Seed Demo Data
+python manage.py seed_data --employees 50 --days 60
+
+7️⃣ Run Server
 python manage.py runserver
-Health check: http://127.0.0.1:8000/health/ → {"status":"ok"}
-Swagger UI: http://127.0.0.1:8000/swagger/
-Admin panel: http://127.0.0.1:8000/admin/
+
+
+Your app will be live at:
+👉 http://127.0.0.1:8000/
+
 🔐 Authentication (JWT)
-1. Get Token
+1️⃣ Get Access Token
+
 POST /api/auth/token/
+
 {
-  "username": "<your_user>",
-  "password": "<your_pass>"
+  "username": "<your_username>",
+  "password": "<your_password>"
 }
+
+
 Response:
 
-{"refresh": "<refresh>", "access": "<access>"}
-2. Use Token
-Add header to all requests:
+{
+  "refresh": "<refresh_token>",
+  "access": "<access_token>"
+}
 
-Authorization: Bearer <access>
-3. Refresh Token
+
+Include this header:
+
+Authorization: Bearer <access_token>
+
+2️⃣ Refresh Token
+
 POST /api/auth/token/refresh/
-{"refresh": "<refresh>"}
-🧭 API Overview
+
+{
+  "refresh": "<refresh_token>"
+}
+
+📚 API Overview
+
 Base path: /api/v1/
 
-Resource	Endpoints
-Employees	GET,POST /employees/; GET,PATCH,DELETE /employees/{id}/
-Departments	GET,POST /departments/; GET,PATCH,DELETE /departments/{id}/
-Attendance	GET,POST /attendance/; GET,PATCH,DELETE /attendance/{id}/
-Performance	GET,POST /performance/; GET,PATCH,DELETE /performance/{id}/
-Health	GET /health
-Supports: filtering, searching, ordering, pagination.
+Resource	Local Endpoint	Render Endpoint	Methods	Description
+👥 Employees	http://127.0.0.1:8000/api/v1/employees/
+	https://employee-project-pza8.onrender.com/api/v1/employees/
+	GET, POST	Manage employees
+🧾 Employee Detail	/employees/{id}/	/employees/{id}/	GET, PATCH, DELETE	Get or modify a specific employee
+🏢 Departments	http://127.0.0.1:8000/api/v1/departments/
+	https://employee-project-pza8.onrender.com/api/v1/departments/
+	GET, POST	Manage departments
+🕒 Attendance	http://127.0.0.1:8000/api/v1/attendance/
+	https://employee-project-pza8.onrender.com/api/v1/attendance/
+	GET, POST	Track attendance
+⭐ Performance	http://127.0.0.1:8000/api/v1/performance/
+	https://employee-project-pza8.onrender.com/api/v1/performance/
+	GET, POST	Manage performance reviews
+🩺 Health Check	http://127.0.0.1:8000/health/
+	https://employee-project-pza8.onrender.com/health/
+	GET	Check server status
+⚙️ Admin Panel (CRUD)
 
-🌐 Deployment (Render)
-This project is configured for Render using render.yaml.
+You can manage all resources from the Django Admin Panel:
 
-1. Deploy
-Connect GitHub repo to Render
+➕ Add new employees, departments, and attendance
 
-Select Blueprint → branch main
+✏️ Edit or update performance data
 
-Render provisions:
+❌ Delete records
 
-Web service (Django + Gunicorn)
-PostgreSQL database (employee-db)
-2. Auto Environment Vars (from render.yaml)
-DATABASE_URL → auto from employee-db
-SECRET_KEY → auto generated
-ALLOWED_HOSTS → .onrender.com,localhost,127.0.0.1
-3. Live Links (after deploy)
-Health: https://employee-project-pza8.onrender.com/health/
-Swagger: https://employee-project-pza8.onrender.com/swagger/
-Admin: https://employee-project-pza8.onrender.com/admin/
-4. Create Superuser on Render
-From Render Dashboard → employee-project → Shell:
+🔍 View related models (e.g., employees by department)
+
+Environment	URL
+Local	http://127.0.0.1:8000/admin/
+
+Render	https://employee-project-pza8.onrender.com/admin/
+☁️ Deployment on Render
+
+This project is pre-configured for Render.
+
+🚀 Steps to Deploy
+
+Connect your GitHub repo on Render
+.
+
+Create a Web Service and choose this repo (employee_project).
+
+Set environment variables:
+
+SECRET_KEY=<your_secret_key>
+DATABASE_URL=<render_postgres_db_url>
+ALLOWED_HOSTS=.onrender.com,localhost,127.0.0.1
+DEBUG=False
+
+
+Render will automatically:
+
+Install dependencies (pip install -r requirements.txt)
+
+Run migrations (python manage.py migrate)
+
+Launch Gunicorn server
+
+Once deployed, visit your Render domain:
+
+https://employee-project-xxxx.onrender.com/
+
+
+Create a superuser via Render Shell:
 
 python manage.py createsuperuser
-Then login at /admin/.
 
-📚 Swagger Docs
-Local: http://127.0.0.1:8000/swagger/
-Render: https://employee-project-pza8.onrender.com/swagger/
-🧰 Common Issues
-Error	Fix
-DisallowedHost	Add .onrender.com to ALLOWED_HOSTS
-gunicorn: command not found	Ensure gunicorn in requirements.txt
-psycopg2 not found	Ensure psycopg2-binary in requirements.txt
-Static files not loading	Add whitenoise.middleware.WhiteNoiseMiddleware to MIDDLEWARE
-401 Unauthorized	Use JWT token in Authorization header
-📊 Bonus (Charts)
-Employees per Department
-Monthly Attendance
-Endpoints:
+🧩 Example Use Case
 
-/analytics/charts/ (HTML charts)
-/analytics/charts/data/employees-per-department/
-/analytics/charts/data/monthly-attendance/
-License
-MIT License.
+👩‍💼 HR admin logs into /admin/
 
-About
-Django REST API for Employee Management with JWT auth, CRUD, Swagger docs, and visualizations.
+🏢 Adds new departments
 
-Resources
- Readme
- Activity
-Stars
- 0 stars
-Watchers
- 0 watching
-Forks
- 0 forks
-Releases
-No releases published
-Create a new release
-Packages
-No packages published
-Publish your first package
-Languages
-Python
-93.8%
- 
-HTML
-5.3%
- 
-Dockerfile
-0.9%
-Footer
-© 2025 GitHub, Inc.
+👥 Adds employees to departments
+
+🕒 Marks attendance and performance data
+
+🔐 Generates JWT tokens for secure API access
+
+📘 Views data and tests APIs on /swagger/
+
+👩‍💻 Author
+
+Medha
+GitHub: @gmpranami
