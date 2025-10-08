@@ -1,21 +1,22 @@
-🧑‍💼 Employee Management System (Django + DRF)
+Employee Management System (Django + DRF)
 
 A complete Employee Management System built using Django and Django REST Framework (DRF).
 It allows you to manage Employees, Departments, Attendance, and Performance through both an interactive Swagger API and the Django Admin Panel.
 
 This system includes:
 
-🛡️ JWT Authentication (using SimpleJWT)
+JWT Authentication (using SimpleJWT)
 
-📘 Swagger API Documentation
+Swagger API Documentation
 
-🗄️ PostgreSQL Database Integration
+PostgreSQL Database Integration
 
-🧠 Automatic Data Seeding with Faker
+Automatic Data Seeding with Faker
 
-☁️ Production Deployment on Render
+Production Deployment on Render
 
-🌟 Overview
+
+Overview
 
 This project is designed as a backend API for a corporate HR system.
 It enables HR managers or admins to:
@@ -30,49 +31,69 @@ It enables HR managers or admins to:
 
 📘 View and test APIs through Swagger
 
-The system is structured with modular Django apps:
+App Structure:
 
-employees/ – Handles employee and performance data
+employees/ → Handles employee and performance data
 
-departments/ – Manages department records
+departments/ → Manages department records
 
-attendance/ – Tracks attendance
+attendance/ → Tracks attendance
 
-analytics/ – Optional extension for analytics and charts
+analytics/ → Optional extension for analytics and charts
 
 ⚙️ Tech Stack
+
 Component	Technology
+
 Framework	Django 5 + Django REST Framework
+
 Authentication	SimpleJWT (JWT Tokens)
+
 Documentation	drf-yasg (Swagger UI)
+
 Database	PostgreSQL (via django-environ)
+
 Demo Data	Faker
+
 Server (Prod)	Gunicorn + WhiteNoise
+
 Hosting	Render Cloud Platform
-🧩 Features
+
+
+Features
 
 ✅ CRUD operations for Employees, Departments, Attendance, and Performance
+
 ✅ JWT authentication for secure API access
+
 ✅ Swagger-based API documentation
+
 ✅ Search, filter, and pagination support
+
 ✅ Health check endpoint for Render uptime
+
 ✅ Automatic demo data seeding (optional)
+
 ✅ Deployable with PostgreSQL on Render
+
+
 
 🧠 How It Works
 
 The backend provides RESTful APIs for managing employee-related data.
 
-Each app (employees, departments, attendance) exposes routes via /api/v1/.
+Each app (employees, departments, attendance) exposes its routes under /api/v1/.
 
-Authentication uses JWT tokens (/api/auth/token/ and /api/auth/token/refresh/).
+Authentication is handled via JWT tokens (/api/auth/token/ & /api/auth/token/refresh/).
 
-Swagger UI (/swagger/) lets you test APIs interactively.
+Swagger UI (/swagger/) allows users to view and test APIs interactively.
 
-Admin users can log in via /admin/ to manage all records visually.
+Admin users can log in through /admin/ for visual management.
 
 🧭 Live Demo (Render Deployment)
+
 Feature	URL
+
 🩺 Health Check	https://employee-project-pza8.onrender.com/health/
 
 📘 Swagger Docs	https://employee-project-pza8.onrender.com/swagger/
@@ -81,62 +102,85 @@ Feature	URL
 
 🔑 Log in to /admin/ using your superuser credentials after creating one via Render Shell.
 
+
 🧰 Local Setup Guide
+
 1️⃣ Clone the Repository
+
 git clone https://github.com/gmpranami/employee_project.git
+
 cd employee_project
 
 2️⃣ Create Environment File
+
 cp .env.example .env
 
-
-Edit .env with:
+Edit .env:
 
 DEBUG=True
+
 SECRET_KEY=change-me
+
 ALLOWED_HOSTS=127.0.0.1,localhost
+
 DATABASE_URL=postgresql://<username>:<password>@localhost:5432/employee_db
 
+
 3️⃣ Install Dependencies
+
 pip install -r requirements.txt
 
+
 4️⃣ Apply Migrations
+
 python manage.py makemigrations
+
 python manage.py migrate
 
+
 5️⃣ Create Superuser
+
 python manage.py createsuperuser
 
-6️⃣ (Optional) Seed Demo Data
+
+6️⃣ Seed Demo Data
+
 python manage.py seed_data --employees 50 --days 60
 
+
 7️⃣ Run Server
+
 python manage.py runserver
 
-
-Your app will be live at:
-👉 http://127.0.0.1:8000/
+Your app will be live at → http://127.0.0.1:8000/
 
 🔐 Authentication (JWT)
+
 1️⃣ Get Access Token
 
 POST /api/auth/token/
 
 {
-  "username": "<your_username>",
-  "password": "<your_password>"
+
+"username": "<your_username>",
+
+"password": "<your_password>"
+
 }
 
 
 Response:
 
 {
+  
   "refresh": "<refresh_token>",
+  
   "access": "<access_token>"
+
 }
 
 
-Include this header:
+Header:
 
 Authorization: Bearer <access_token>
 
@@ -153,33 +197,51 @@ POST /api/auth/token/refresh/
 Base path: /api/v1/
 
 Resource	Local Endpoint	Render Endpoint	Methods	Description
+
 👥 Employees	http://127.0.0.1:8000/api/v1/employees/
+	
 	https://employee-project-pza8.onrender.com/api/v1/employees/
+	
 	GET, POST	Manage employees
-🧾 Employee Detail	/employees/{id}/	/employees/{id}/	GET, PATCH, DELETE	Get or modify a specific employee
+
+🧾 Employee Detail	/employees/{id}/	/employees/{id}/	GET, PATCH, DELETE	Retrieve or modify specific employee
+
 🏢 Departments	http://127.0.0.1:8000/api/v1/departments/
+	
 	https://employee-project-pza8.onrender.com/api/v1/departments/
+	
 	GET, POST	Manage departments
+
 🕒 Attendance	http://127.0.0.1:8000/api/v1/attendance/
+
 	https://employee-project-pza8.onrender.com/api/v1/attendance/
+	
 	GET, POST	Track attendance
+
 ⭐ Performance	http://127.0.0.1:8000/api/v1/performance/
+
 	https://employee-project-pza8.onrender.com/api/v1/performance/
+	
 	GET, POST	Manage performance reviews
+
 🩺 Health Check	http://127.0.0.1:8000/health/
+
 	https://employee-project-pza8.onrender.com/health/
+	
 	GET	Check server status
+
 ⚙️ Admin Panel (CRUD)
 
-You can manage all resources from the Django Admin Panel:
 
-➕ Add new employees, departments, and attendance
+Manage all data visually from Django Admin:
 
-✏️ Edit or update performance data
+➕ Add employees, departments, attendance, and performance
+
+✏️ Edit existing records
 
 ❌ Delete records
 
-🔍 View related models (e.g., employees by department)
+🔍 View linked relationships (e.g., employees by department)
 
 Environment	URL
 Local	http://127.0.0.1:8000/admin/
@@ -187,20 +249,24 @@ Local	http://127.0.0.1:8000/admin/
 Render	https://employee-project-pza8.onrender.com/admin/
 ☁️ Deployment on Render
 
-This project is pre-configured for Render.
+This project is pre-configured for Render deployment.
 
 🚀 Steps to Deploy
 
-Connect your GitHub repo on Render
+Connect your GitHub repository on Render
 .
 
-Create a Web Service and choose this repo (employee_project).
+Create a Web Service → select your repo (employee_project).
 
 Set environment variables:
 
+
 SECRET_KEY=<your_secret_key>
+
 DATABASE_URL=<render_postgres_db_url>
+
 ALLOWED_HOSTS=.onrender.com,localhost,127.0.0.1
+
 DEBUG=False
 
 
@@ -210,30 +276,30 @@ Install dependencies (pip install -r requirements.txt)
 
 Run migrations (python manage.py migrate)
 
-Launch Gunicorn server
+Serve using Gunicorn + WhiteNoise
 
-Once deployed, visit your Render domain:
+Once deployed, open your app at:
 
 https://employee-project-xxxx.onrender.com/
 
 
-Create a superuser via Render Shell:
+To create an admin user (on Render Shell):
 
 python manage.py createsuperuser
 
 🧩 Example Use Case
 
-👩‍💼 HR admin logs into /admin/
+👩‍💼 HR Admin logs into /admin/
 
 🏢 Adds new departments
 
-👥 Adds employees to departments
+👥 Adds employees to those departments
 
 🕒 Marks attendance and performance data
 
 🔐 Generates JWT tokens for secure API access
 
-📘 Views data and tests APIs on /swagger/
+📘 Views data and tests endpoints via /swagger/
 
 👩‍💻 Author
 
