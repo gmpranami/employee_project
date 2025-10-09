@@ -15,6 +15,8 @@ Automatic Data Seeding with Faker
 
 Production Deployment on Render
 
+Optional Analytics with Charts
+
 
 Overview
 
@@ -76,6 +78,7 @@ Features
 
 ✅ Deployable with PostgreSQL on Render
 
+✅ Bonus analytics (charts + data APIs)
 
 
 🧠 How It Works
@@ -90,6 +93,8 @@ Swagger UI (/swagger/) allows users to view and test APIs interactively.
 
 Admin users can log in through /admin/ for visual management.
 
+Analytics module provides visual summaries of employees and attendance trends.
+
 🧭 Live Demo (Render Deployment)
 
 Feature	URL
@@ -101,6 +106,8 @@ Feature	URL
 ⚙️ Admin Panel	https://employee-project-pza8.onrender.com/admin/
 
 🔑 Log in to /admin/ using your superuser credentials after creating one via Render Shell.
+
+Charts (HTML View) https://employee-project-pza8.onrender.com/api/v1/analytics/charts/
 
 
 🧰 Local Setup Guide
@@ -224,6 +231,16 @@ Resource	Local Endpoint	Render Endpoint	Methods	Description
 	
 	GET, POST	Manage performance reviews
 
+📈 Charts (HTML)
+
+http://127.0.0.1:8000/api/v1/analytics/charts/
+
+https://employee-project-pza8.onrender.com/api/v1/analytics/charts/
+
+GET
+
+View data charts
+
 🩺 Health Check	http://127.0.0.1:8000/health/
 
 	https://employee-project-pza8.onrender.com/health/
@@ -299,9 +316,12 @@ python manage.py createsuperuser
 
 🔐 Generates JWT tokens for secure API access
 
+📊 Views charts via /api/v1/analytics/charts/
+
 📘 Views data and tests endpoints via /swagger/
 
 👩‍💻 Author
 
 Medha
 GitHub: @gmpranami
+
