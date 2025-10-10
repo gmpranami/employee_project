@@ -15,6 +15,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     """CRUD API for employees with advanced filtering and search."""
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = {
         "department": ["exact"],
@@ -28,6 +29,7 @@ class PerformanceViewSet(viewsets.ModelViewSet):
     """CRUD API for performance reviews."""
     queryset = Performance.objects.select_related("employee").all()
     serializer_class = PerformanceSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
     filterset_fields = {"employee": ["exact"], "rating": ["gte", "lte"]}
     search_fields = ["employee__name", "employee__email"]
