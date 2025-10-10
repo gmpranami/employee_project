@@ -107,19 +107,26 @@ DATABASES = {
 # REST FRAMEWORK / SIMPLEJWT
 # ---------------------------------------------------------------------
 REST_FRAMEWORK = {
+    # Use ONLY JWT authentication for APIs
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.SessionAuthentication", 
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+
+    # Require authentication globally for all endpoints
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+
+    # Enable filtering, search, and ordering
     "DEFAULT_FILTER_BACKENDS": (
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
         "rest_framework.filters.SearchFilter",
     ),
+
+    # Pagination setup
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
-    # If you want all endpoints to require auth by default, uncomment:
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
 # Extend JWT lifetimes here

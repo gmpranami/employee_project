@@ -10,11 +10,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Attendance
 from .serializers import AttendanceSerializer, PerformanceSerializer
 from employees.models import Performance
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class AttendanceViewSet(viewsets.ModelViewSet):
+   
     """CRUD API for employee attendance records."""
     queryset = Attendance.objects.select_related("employee", "employee__department").all()
     serializer_class = AttendanceSerializer
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
     filterset_fields = {
@@ -30,6 +33,7 @@ class PerformanceViewSet(viewsets.ModelViewSet):
     """CRUD API for employee performance reviews."""
     queryset = Performance.objects.select_related("employee", "employee__department").all()
     serializer_class = PerformanceSerializer
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
     filterset_fields = {
